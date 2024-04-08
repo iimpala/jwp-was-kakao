@@ -33,22 +33,32 @@ public class RequestHandler implements Runnable {
                 path = headerLine[1];
             }
 
+            String[] parsedPath = path.split("\\.");
+            String ext = parsedPath[parsedPath.length - 1];
+
+            String pathPrefix = "./";
+            if ("html".equals(ext)) {
+                pathPrefix += "templates";
+            } else {
+                pathPrefix += "static";
+            }
+
             // index.html 읽기
-            byte[] bytes = FileIoUtils.loadFileFromClasspath("./templates" + path);
+            byte[] bytes = FileIoUtils.loadFileFromClasspath(pathPrefix + path);
 
             // response message 만들기
             DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, bytes.length);
+            response200Header(dos, bytes.length, ext);
             responseBody(dos, bytes);
         } catch (IOException | URISyntaxException e) {
             logger.error(e.getMessage());
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String ext) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: text/"+ ext +";charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
