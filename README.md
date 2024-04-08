@@ -7,3 +7,12 @@
 
 ## 온라인 코드 리뷰 과정
 * [텍스트와 이미지로 살펴보는 온라인 코드 리뷰 과정](https://github.com/next-step/nextstep-docs/tree/master/codereview)
+
+## TODO
+
+### 1. GET /index.html 응답하기
+- [ ] 요청 헤더 읽기(출력하기)
+- [ ] 요청 헤더에서 경로 파싱하기
+- [ ] 경로에 맞는 파일(index.html) 읽기(file I/O)
+- [ ] 응답 메시지 본문에 파일 내용 작성하기
+- [ ] 응답 메시지 전송하기
