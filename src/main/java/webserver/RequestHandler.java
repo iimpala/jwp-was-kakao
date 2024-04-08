@@ -3,7 +3,12 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
+import db.DataBase;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileIoUtils;
@@ -30,26 +35,52 @@ public class RequestHandler implements Runnable {
             String path = "";
             if (!"".equals(line)) {
                 String[] headerLine = line.split(" ");
-                path = headerLine[1];
+                path = URLDecoder.decode(headerLine[1], StandardCharsets.UTF_8);
             }
 
-            String[] parsedPath = path.split("\\.");
-            String ext = parsedPath[parsedPath.length - 1];
+            if (path.contains("?")) {
+                //user 회원가입
+                String[] userUrl = path.split("\\?");
+                String userInfo = userUrl[1];
 
-            String pathPrefix = "./";
-            if ("html".equals(ext)) {
-                pathPrefix += "templates";
+                String userId = userInfo.split("\\&")[0].split("=")[1];
+                String password = userInfo.split("\\&")[1].split("=")[1];
+                String name = userInfo.split("\\&")[2].split("=")[1];
+                String email = userInfo.split("\\&")[3].split("=")[1];
+
+                User user = new User(userId, password, name, email);
+                DataBase.addUser(user);
+
+                System.out.println("found: " + DataBase.findUserById(userId));
+                byte[] bytes = "ok".getBytes();
+                String ext = "text";
+
+                // response message 만들기
+                DataOutputStream dos = new DataOutputStream(out);
+                response200Header(dos, bytes.length, ext);
+                responseBody(dos, bytes);
+
             } else {
-                pathPrefix += "static";
+                String[] parsedPath = path.split("\\.");
+                String ext = parsedPath[parsedPath.length - 1];
+
+                String pathPrefix = "./";
+                if ("html".equals(ext)) {
+                    pathPrefix += "templates";
+                } else {
+                    pathPrefix += "static";
+                }
+
+
+                // index.html 읽기
+                byte[] bytes = FileIoUtils.loadFileFromClasspath(pathPrefix + path);
+
+                // response message 만들기
+                DataOutputStream dos = new DataOutputStream(out);
+                response200Header(dos, bytes.length, ext);
+                responseBody(dos, bytes);
             }
 
-            // index.html 읽기
-            byte[] bytes = FileIoUtils.loadFileFromClasspath(pathPrefix + path);
-
-            // response message 만들기
-            DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, bytes.length, ext);
-            responseBody(dos, bytes);
         } catch (IOException | URISyntaxException e) {
             logger.error(e.getMessage());
         }
