@@ -2,6 +2,8 @@ package utils;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import webserver.HttpRequest;
 
 import java.util.ArrayList;
@@ -67,5 +69,22 @@ public class HttpRequestParserTest {
         Assertions.assertThat(queryParams.get("password")).isEqualTo("");
         Assertions.assertThat(queryParams.get("name")).isEqualTo("");
         Assertions.assertThat(queryParams.get("email")).isEqualTo("");
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "/index.html ; html",
+            "/scripts.js ; js",
+            "/styles.css ; css",
+            "/favicon.ico ; ico",
+            "/user/create ; ",
+    }, delimiter = ';')
+    void parser는_requestUri를_받아_확장자를_알려준다(String requestUri, String expected) {
+        //given
+        //when
+        String actual = HttpRequestParser.parseExt(requestUri);
+
+        //then
+        Assertions.assertThat(actual).isEqualTo(expected);
     }
 }

@@ -19,9 +19,9 @@ public class HttpRequestParser {
 
         Map<String, String> queryParams = new HashMap<>();
         if (requestUri.contains("?")) {
-            String[] parsed = requestUri.split("\\?");
-            requestUri = parsed[0];
-            queryParams = parseQueryString(parsed[1]);
+            String[] splitUri = requestUri.split("\\?");
+            requestUri = splitUri[0];
+            queryParams = parseQueryString(splitUri[1]);
         }
 
         return new HttpRequest(method, requestUri, queryParams, httpVersion, null, null);
@@ -29,16 +29,21 @@ public class HttpRequestParser {
 
     private static Map<String, String> parseQueryString(String queryString) {
         Map<String, String> queryParams = new HashMap<>();
-        String[] params = queryString.split("\\&");
+        String[] splitParams = queryString.split("\\&");
 
-        for (String paramString : params) {
-            String[] param = paramString.split("=");
-            String key = param[0];
-            String value = param.length < 2 ? "" : param[1];
+        for (String splitParam : splitParams) {
+            String[] splitParamElements = splitParam.split("=");
+            String key = splitParamElements[0];
+            String value = splitParamElements.length < 2 ? "" : splitParamElements[1];
 
             queryParams.put(key, value);
         }
 
         return queryParams;
+    }
+
+    public static String parseExt(String requestUri) {
+        String[] splitResource = requestUri.split("\\.");
+        return splitResource.length < 2 ? null : splitResource[splitResource.length - 1];
     }
 }
