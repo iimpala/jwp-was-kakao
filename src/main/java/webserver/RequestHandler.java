@@ -5,12 +5,14 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import db.DataBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.UserDto;
 import service.UserService;
 import utils.FileIoUtils;
 import utils.HttpRequestParser;
+import utils.IOUtils;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -28,13 +30,20 @@ public class RequestHandler implements Runnable {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            DataOutputStream dos = new DataOutputStream(out);
 
             List<String> headerLines = getHeaderLines(reader);
+
             HttpRequest request = HttpRequestParser.parse(headerLines);
 
-            HttpResponse response = handleRequest(request);
+            String body = "";
+            if ("POST".equals(request.getHeader().getRequestLine().getMethod())) {
+                int contentLength = request.getHeader().getContentLength();
+                body = IOUtils.readData(reader, contentLength);
+            }
+            request.setBody(body);
 
-            DataOutputStream dos = new DataOutputStream(out);
+            HttpResponse response = handleRequest(request);
             sendResponse(dos, response);
         } catch (IOException | URISyntaxException e) {
             logger.error(e.getMessage());
@@ -43,11 +52,12 @@ public class RequestHandler implements Runnable {
 
     private HttpResponse handleRequest(HttpRequest request) throws IOException, URISyntaxException {
         Map<String, String> queryParams = request.getQueryParams();
-        String requestUri = request.getRequestUri();
+        RequestLine requestLine = request.getHeader().getRequestLine();
+        String requestUri = requestLine.getRequestUri();
 
         Map<String, String> responseHeader = new HashMap<>();
 
-        if (queryParams.isEmpty()) {
+        if ("GET".equals(requestLine.getMethod())) {
             String extension = HttpRequestParser.parseExt(requestUri);
             String pathPrefix = "html".equals(extension) ? "./templates" : "./static";
             byte[] body = FileIoUtils.loadFileFromClasspath(pathPrefix + requestUri);
@@ -59,24 +69,23 @@ public class RequestHandler implements Runnable {
                     responseHeader, body);
 
         } else {
-            if (requestUri.equals("/user/create")) {
-                UserDto userDto = new UserDto(
-                        queryParams.getOrDefault("userId", ""),
-                        queryParams.getOrDefault("password", ""),
-                        queryParams.getOrDefault("name", ""),
-                        queryParams.getOrDefault("email", "")
-                );
+            String body = request.getBody();
+            Map<String, String> params = HttpRequestParser.parseUrlEncodedString(body);
 
-                UserService service = new UserService();
-                service.save(userDto);
-            }
+            UserDto userDto = new UserDto(
+                    params.getOrDefault("userId", ""),
+                    params.getOrDefault("password", ""),
+                    params.getOrDefault("name", ""),
+                    params.getOrDefault("email", "")
+            );
+            UserService service = new UserService();
+            service.save(userDto);
 
-            byte[] body = "ok".getBytes();
-            responseHeader.put("Content-Type", "text/plain;charset=utf-8");
-            responseHeader.put("Content-Length", String.valueOf(body.length));
+            String host = request.getHeader().getHeaders().get("Host");
+            responseHeader.put("Location", "http://" + host + "/index.html");
 
-            return new HttpResponse("HTTP/1.1", 200, "OK",
-                    responseHeader, body);
+            return new HttpResponse("HTTP/1.1", 302, "FOUND",
+                    responseHeader, "".getBytes());
         }
     }
 

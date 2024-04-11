@@ -1,6 +1,8 @@
 package utils;
 
+import webserver.HttpHeader;
 import webserver.HttpRequest;
+import webserver.RequestLine;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -21,13 +23,30 @@ public class HttpRequestParser {
         if (requestUri.contains("?")) {
             String[] splitUri = requestUri.split("\\?");
             requestUri = splitUri[0];
-            queryParams = parseQueryString(splitUri[1]);
+            queryParams = parseUrlEncodedString(splitUri[1]);
         }
 
-        return new HttpRequest(method, requestUri, queryParams, httpVersion, null, null);
+        Map<String, String> headers = parseHeaders(headerString);
+        HttpHeader header = new HttpHeader(new RequestLine(method, requestUri, httpVersion), headers);
+        // String body = parseBody();
+
+        return new HttpRequest(header, null, queryParams);
+//        return new HttpRequest(method, requestUri, queryParams, httpVersion, headers, body);
     }
 
-    private static Map<String, String> parseQueryString(String queryString) {
+    public static Map<String, String> parseHeaders(List<String> headerString) {
+        HashMap<String, String> headers = new HashMap<>();
+
+        for (int i = 1; i < headerString.size(); i++) {
+            String headerLine = headerString.get(i);
+            String[] splitHeader = headerLine.split(": ");
+            headers.put(splitHeader[0], splitHeader[1]);
+        }
+
+        return headers;
+    }
+
+    public static Map<String, String> parseUrlEncodedString(String queryString) {
         Map<String, String> queryParams = new HashMap<>();
         String[] splitParams = queryString.split("\\&");
 
