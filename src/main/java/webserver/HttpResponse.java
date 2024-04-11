@@ -29,7 +29,7 @@ public class HttpResponse {
         sb.append(httpVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" \r\n");
 
         headers.keySet().forEach(key -> {
-            String value= headers.get(key);
+            String value = headers.get(key);
             sb.append(key).append(": ").append(value).append("\r\n");
         });
 

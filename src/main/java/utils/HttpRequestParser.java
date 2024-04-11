@@ -1,7 +1,6 @@
 package utils;
 
-import webserver.HttpHeader;
-import webserver.HttpRequest;
+import webserver.HttpRequestHeader;
 import webserver.RequestLine;
 
 import java.net.URLDecoder;
@@ -12,38 +11,15 @@ import java.util.Map;
 
 public class HttpRequestParser {
 
-    public static HttpRequest parse(List<String> headerString) {
-        String[] requestLine = headerString.get(0).split(" ");
-
-        String method = requestLine[0];
-        String requestUri = URLDecoder.decode(requestLine[1], StandardCharsets.UTF_8);
-        String httpVersion = requestLine[2];
-
-        Map<String, String> queryParams = new HashMap<>();
-        if (requestUri.contains("?")) {
-            String[] splitUri = requestUri.split("\\?");
-            requestUri = splitUri[0];
-            queryParams = parseUrlEncodedString(splitUri[1]);
-        }
-
-        Map<String, String> headers = parseHeaders(headerString);
-        HttpHeader header = new HttpHeader(new RequestLine(method, requestUri, httpVersion), headers);
-        // String body = parseBody();
-
-        return new HttpRequest(header, null, queryParams);
-//        return new HttpRequest(method, requestUri, queryParams, httpVersion, headers, body);
-    }
-
-    public static Map<String, String> parseHeaders(List<String> headerString) {
+    public static HttpRequestHeader parseHeaders(List<String> headerString) {
         HashMap<String, String> headers = new HashMap<>();
 
-        for (int i = 1; i < headerString.size(); i++) {
-            String headerLine = headerString.get(i);
+        for (String headerLine : headerString) {
             String[] splitHeader = headerLine.split(": ");
             headers.put(splitHeader[0], splitHeader[1]);
         }
 
-        return headers;
+        return new HttpRequestHeader(headers);
     }
 
     public static Map<String, String> parseUrlEncodedString(String queryString) {
@@ -64,5 +40,23 @@ public class HttpRequestParser {
     public static String parseExt(String requestUri) {
         String[] splitResource = requestUri.split("\\.");
         return splitResource.length < 2 ? null : splitResource[splitResource.length - 1];
+    }
+
+    public static RequestLine parseRequestLine(String requestLine) {
+        String[] splitRequestLine = requestLine.split(" ");
+
+        String method = splitRequestLine[0];
+
+        String requestUri = URLDecoder.decode(splitRequestLine[1], StandardCharsets.UTF_8);
+        String queryString = "";
+        if (requestUri.contains("?")) {
+            String[] splitQueryString = requestUri.split("\\?");
+            requestUri = splitQueryString[0];
+            queryString = splitQueryString[1];
+        }
+
+        String httpVersion = splitRequestLine[2];
+
+        return new RequestLine(method, requestUri, queryString, httpVersion);
     }
 }

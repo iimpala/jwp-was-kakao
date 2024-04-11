@@ -4,29 +4,39 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final HttpHeader header;
+    private final RequestLine requestLine;
+    private final HttpRequestHeader header;
     private String body;
     private final Map<String, String> queryParams;
 
-    public HttpRequest(HttpHeader header, String body, Map<String, String> queryParams) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeader header, String body, Map<String, String> queryParams) {
+        this.requestLine = requestLine;
         this.header = header;
         this.body = body;
         this.queryParams = queryParams;
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getRequestUri() {
+        return requestLine.getRequestUri();
     }
 
     public Map<String, String> getQueryParams() {
         return queryParams;
     }
 
-    public HttpHeader getHeader() {
+    public HttpRequestHeader getHeader() {
         return header;
     }
 
     public String getBody() {
         return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 }
