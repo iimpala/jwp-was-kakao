@@ -1,7 +1,8 @@
-package webserver;
+package webserver.request;
 
-import utils.HttpRequestParser;
 import utils.IOUtils;
+import utils.parser.DataFormat;
+import utils.parser.DataParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,14 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequestFactory {
+    private static final DataParser parser = DataParser.get(DataFormat.URL_ENCODED);
 
-    public static HttpRequest createRequest(BufferedReader reader) throws Exception{
-        RequestLine requestLine = HttpRequestParser.parseRequestLine(reader.readLine());
+    public static HttpRequest createRequest(BufferedReader reader) throws Exception {
+        RequestLine requestLine = RequestLine.of(reader.readLine());
 
         String queryString = requestLine.getQueryString();
-        Map<String, String> queryParams = HttpRequestParser.parseUrlEncodedString(queryString);
+        Map<String, String> queryParams = parser.parse(queryString);
 
-        HttpRequestHeader header = HttpRequestParser.parseHeaders(getHeaderLines(reader));
+        HttpRequestHeader header = new HttpRequestHeader(getHeaderLines(reader));
 
         int contentLength = header.getContentLength();
         String body = IOUtils.readData(reader, contentLength);

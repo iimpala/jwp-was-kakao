@@ -2,20 +2,16 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.UserDto;
-import service.UserService;
-import utils.FileIoUtils;
-import utils.HttpRequestParser;
+import webserver.request.HttpRequest;
+import webserver.request.HttpRequestFactory;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-
     private final Socket connection;
+    private final RequestController controller = new RequestController();
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -32,59 +28,10 @@ public class RequestHandler implements Runnable {
 
             HttpRequest request = HttpRequestFactory.createRequest(reader);
 
-            if ("GET".equals(request.getMethod())) {
-                doGet(request, dos);
-                return;
-            }
-
-            if ("POST".equals(request.getMethod())) {
-                doPost(request, dos);
-            }
-
+            HttpResponse response = controller.service(request);
+            sendResponse(dos, response);
         } catch (Exception e) {
             logger.error(e.getMessage());
-        }
-    }
-
-    private void doGet(HttpRequest request, DataOutputStream dos) throws IOException, URISyntaxException {
-        Map<String, String> responseHeader = new HashMap<>();
-
-        String requestUri = request.getRequestUri();
-        String extension = HttpRequestParser.parseExt(requestUri);
-
-        String pathPrefix = "html".equals(extension) ? "./templates" : "./static";
-        byte[] body = FileIoUtils.loadFileFromClasspath(pathPrefix + requestUri);
-
-        responseHeader.put("Content-Type", "text/" + extension + ";charset=utf-8");
-        responseHeader.put("Content-Length", String.valueOf(body.length));
-
-        HttpResponse response = new HttpResponse("HTTP/1.1", 200, "OK", responseHeader, body);
-
-        sendResponse(dos, response);
-    }
-
-    private void doPost(HttpRequest request, DataOutputStream dos) {
-        Map<String, String> responseHeader = new HashMap<>();
-
-        if ("/user/create".equals(request.getRequestUri())) {
-            String body = request.getBody();
-            Map<String, String> params = HttpRequestParser.parseUrlEncodedString(body);
-
-            UserDto userDto = new UserDto(
-                    params.getOrDefault("userId", ""),
-                    params.getOrDefault("password", ""),
-                    params.getOrDefault("name", ""),
-                    params.getOrDefault("email", "")
-            );
-            UserService service = new UserService();
-            service.save(userDto);
-
-            String host = request.getHeader().getHost();
-            responseHeader.put("Location", "http://" + host + "/index.html");
-
-            HttpResponse response = new HttpResponse("HTTP/1.1", 302, "FOUND",
-                    responseHeader, "".getBytes());
-            sendResponse(dos, response);
         }
     }
 
