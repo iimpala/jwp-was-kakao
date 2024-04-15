@@ -9,11 +9,11 @@ public class RequestLine {
     private static final int PATH_INDEX = 1;
     private static final int VERSION_INDEX = 2;
 
-    private final String method;
+    private final HttpRequestMethod method;
     private final RequestUri requestUri;
     private final String httpVersion;
 
-    private RequestLine(String method, RequestUri requestUri, String httpVersion) {
+    private RequestLine(HttpRequestMethod method, RequestUri requestUri, String httpVersion) {
         this.method = method;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -26,10 +26,10 @@ public class RequestLine {
         String requestUri = URLDecoder.decode(requestLineElements[PATH_INDEX], StandardCharsets.UTF_8);
         String httpVersion = requestLineElements[VERSION_INDEX];
 
-        return new RequestLine(method, RequestUri.of(requestUri), httpVersion);
+        return new RequestLine(HttpRequestMethod.valueOf(method), RequestUri.of(requestUri), httpVersion);
     }
 
-    public String getMethod() {
+    public HttpRequestMethod getMethod() {
         return method;
     }
 

@@ -17,15 +17,15 @@ public class RequestController {
     private final UserService service = new UserService();
 
     public HttpResponse service(HttpRequest request) throws IOException, URISyntaxException {
-        if ("GET".equals(request.getMethod())) {
+        if (request.isGet()) {
             return doGet(request);
         }
 
-        if ("POST".equals(request.getMethod())) {
+        if (request.isPost()) {
             return doPost(request);
         }
 
-        return null;
+        return HttpResponseFactory.badRequest();
     }
 
     private HttpResponse doGet(HttpRequest request) throws IOException, URISyntaxException {

@@ -16,11 +16,19 @@ public class HttpRequest {
         this.queryParams = queryParams;
     }
 
+    public boolean isGet() {
+        return HttpRequestMethod.GET.equals(this.getMethod());
+    }
+
+    public boolean isPost() {
+        return HttpRequestMethod.POST.equals(this.getMethod());
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
-    public String getMethod() {
+    public HttpRequestMethod getMethod() {
         return requestLine.getMethod();
     }
 
