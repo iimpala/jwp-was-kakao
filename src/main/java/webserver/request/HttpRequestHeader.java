@@ -30,6 +30,10 @@ public class HttpRequestHeader {
         return headers;
     }
 
+    public String getContentType() {
+        return headers.get("Content-Type");
+    }
+
     public int getContentLength() {
         return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
     }

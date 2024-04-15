@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class RequestController {
-    private final DataParser parser = DataParser.get(DataFormat.URL_ENCODED);
     private final UserService service = new UserService();
 
     public HttpResponse service(HttpRequest request) throws IOException, URISyntaxException {
@@ -49,11 +48,21 @@ public class RequestController {
 
     private HttpResponse doPost(HttpRequest request) {
         if ("/user/create".equals(request.getPath())) {
+            DataParser parser = getParserFromContentType(request);
+
             String body = request.getBody();
             return saveUser(request, parser.parse(body));
         }
 
         return HttpResponseFactory.badRequest();
+    }
+
+    private DataParser getParserFromContentType(HttpRequest request) {
+        String contentType = request.getHeader().getContentType();
+        Optional<DataFormat> optionalDataFormat = DataFormat.ofContentType(contentType);
+        DataFormat dataFormat = optionalDataFormat.orElseThrow(IllegalArgumentException::new);
+
+        return DataParser.get(dataFormat);
     }
 
     private HttpResponse serveResource(Resource resource, String path, String extension) throws IOException, URISyntaxException {
@@ -63,11 +72,6 @@ public class RequestController {
         response.addHeader("Content-Type", "text/" + extension + ";charset=utf-8");
 
         return response;
-    }
-
-    private static String parseExt(String requestUri) {
-        String[] splitResource = requestUri.split("\\.");
-        return splitResource.length >= 2 ? splitResource[splitResource.length - 1] : null;
     }
 
     private HttpResponse saveUser(HttpRequest request, Map<String, String> param) {
@@ -80,5 +84,10 @@ public class RequestController {
         service.save(userDto);
 
         return HttpResponseFactory.redirect(request, "/index.html");
+    }
+
+    private static String parseExt(String requestUri) {
+        String[] splitResource = requestUri.split("\\.");
+        return splitResource.length >= 2 ? splitResource[splitResource.length - 1] : null;
     }
 }
