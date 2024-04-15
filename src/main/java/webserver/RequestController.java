@@ -6,10 +6,13 @@ import utils.FileIoUtils;
 import utils.parser.DataFormat;
 import utils.parser.DataParser;
 import webserver.request.HttpRequest;
+import webserver.response.HttpResponse;
+import webserver.response.HttpResponseHeader;
+import webserver.response.HttpStatusCode;
+import webserver.response.StatusLine;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestController {
@@ -29,23 +32,21 @@ public class RequestController {
     }
 
     private HttpResponse doGet(HttpRequest request) throws IOException, URISyntaxException {
-        Map<String, String> responseHeader = new HashMap<>();
-
         String path = request.getPath();
         String extension = parseExt(path);
 
         String pathPrefix = "html".equals(extension) ? "./templates" : "./static";
         byte[] body = FileIoUtils.loadFileFromClasspath(pathPrefix + path);
 
-        responseHeader.put("Content-Type", "text/" + extension + ";charset=utf-8");
-        responseHeader.put("Content-Length", String.valueOf(body.length));
+        HttpResponseHeader header = new HttpResponseHeader();
+        header.addHeader("Content-Type", "text/" + extension + ";charset=utf-8");
+        header.addHeader("Content-Length", String.valueOf(body.length));
 
-        return new HttpResponse("HTTP/1.1", 200, "OK", responseHeader, body);
+        StatusLine statusLine = new StatusLine("HTTP/1.1", HttpStatusCode.OK);
+        return new HttpResponse(statusLine, header, body);
     }
 
     private HttpResponse doPost(HttpRequest request) {
-        Map<String, String> responseHeader = new HashMap<>();
-
         if ("/user/create".equals(request.getPath())) {
             String body = request.getBody();
             Map<String, String> params = parser.parse(body);
@@ -56,14 +57,15 @@ public class RequestController {
                     params.getOrDefault("name", ""),
                     params.getOrDefault("email", "")
             );
-
             service.save(userDto);
 
-            String host = request.getHeader().getHost();
-            responseHeader.put("Location", "http://" + host + "/index.html");
+            HttpResponseHeader header = new HttpResponseHeader();
 
-            return new HttpResponse("HTTP/1.1", 302, "FOUND",
-                    responseHeader, "".getBytes());
+            String host = request.getHeader().getHost();
+            header.addHeader("Location", "http://" + host + "/index.html");
+
+            StatusLine statusLine = new StatusLine("HTTP/1.1", HttpStatusCode.FOUND);
+            return new HttpResponse(statusLine, header, "".getBytes());
         }
 
         return null;
