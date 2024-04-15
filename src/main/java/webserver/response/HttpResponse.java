@@ -19,6 +19,9 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void addHeader(String key, String value) {
+        header.addHeader(key, value);
+    }
 
     public byte[] getBytes() {
         byte[] responseHeader = (String.valueOf(statusLine) + header).getBytes();

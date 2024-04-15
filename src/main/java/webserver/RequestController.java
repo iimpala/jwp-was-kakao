@@ -6,10 +6,7 @@ import utils.FileIoUtils;
 import utils.parser.DataFormat;
 import utils.parser.DataParser;
 import webserver.request.HttpRequest;
-import webserver.response.HttpResponse;
-import webserver.response.HttpResponseHeader;
-import webserver.response.HttpStatusCode;
-import webserver.response.StatusLine;
+import webserver.response.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -38,12 +35,10 @@ public class RequestController {
         String pathPrefix = "html".equals(extension) ? "./templates" : "./static";
         byte[] body = FileIoUtils.loadFileFromClasspath(pathPrefix + path);
 
-        HttpResponseHeader header = new HttpResponseHeader();
-        header.addHeader("Content-Type", "text/" + extension + ";charset=utf-8");
-        header.addHeader("Content-Length", String.valueOf(body.length));
+        HttpResponse response = HttpResponseFactory.ok(body);
+        response.addHeader("Content-Type", "text/" + extension + ";charset=utf-8");
 
-        StatusLine statusLine = new StatusLine("HTTP/1.1", HttpStatusCode.OK);
-        return new HttpResponse(statusLine, header, body);
+        return response;
     }
 
     private HttpResponse doPost(HttpRequest request) {
@@ -59,16 +54,10 @@ public class RequestController {
             );
             service.save(userDto);
 
-            HttpResponseHeader header = new HttpResponseHeader();
-
-            String host = request.getHeader().getHost();
-            header.addHeader("Location", "http://" + host + "/index.html");
-
-            StatusLine statusLine = new StatusLine("HTTP/1.1", HttpStatusCode.FOUND);
-            return new HttpResponse(statusLine, header, "".getBytes());
+            return HttpResponseFactory.redirect(request, "/index.html");
         }
 
-        return null;
+        return HttpResponseFactory.badRequest();
     }
 
     public static String parseExt(String requestUri) {
