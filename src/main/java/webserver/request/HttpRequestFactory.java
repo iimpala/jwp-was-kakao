@@ -22,9 +22,19 @@ public class HttpRequestFactory {
         HttpRequestHeader header = new HttpRequestHeader(getHeaderLines(reader));
 
         int contentLength = header.getContentLength();
-        String body = IOUtils.readData(reader, contentLength);
+        String body = getRequestBody(reader, contentLength);
 
         return new HttpRequest(requestLine, header, body, queryParams);
+    }
+
+    private static String getRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        String body = IOUtils.readData(reader, contentLength);
+
+        if (body.length() != contentLength) {
+            throw new RuntimeException("Illegal Content-Length");
+        }
+
+        return body;
     }
 
     private static List<String> getHeaderLines(BufferedReader reader) throws IOException {
