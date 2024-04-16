@@ -3,9 +3,9 @@ package webserver.controller;
 import service.UserCreateDto;
 import service.UserService;
 import utils.parser.DataParser;
-import webserver.request.HttpRequest;
-import webserver.response.HttpResponse;
-import webserver.response.HttpResponseFactory;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
+import webserver.http.response.HttpResponseFactory;
 
 import java.util.Map;
 

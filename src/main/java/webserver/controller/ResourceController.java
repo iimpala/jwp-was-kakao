@@ -2,8 +2,9 @@ package webserver.controller;
 
 import utils.FileIoUtils;
 import webserver.Resource;
-import webserver.request.HttpRequest;
-import webserver.response.*;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
+import webserver.http.response.HttpResponseFactory;
 
 import java.util.Optional;
 

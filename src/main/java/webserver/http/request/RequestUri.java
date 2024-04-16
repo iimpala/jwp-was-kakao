@@ -1,4 +1,4 @@
-package webserver.request;
+package webserver.http.request;
 
 public class RequestUri {
     private static final String QUERY_STRING_DELIMITER = "\\?";

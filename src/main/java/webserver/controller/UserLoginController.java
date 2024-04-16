@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import service.UserLoginDto;
 import service.UserService;
 import utils.parser.DataParser;
-import webserver.request.HttpRequest;
-import webserver.response.HttpResponse;
-import webserver.response.HttpResponseFactory;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
+import webserver.http.response.HttpResponseFactory;
 
 import java.util.Map;
 
@@ -35,6 +35,9 @@ public class UserLoginController extends AbstractController {
         try {
             User user = userService.login(userLoginDto);
             logger.info("Login Success : {}", user);
+
+
+
             return HttpResponseFactory.redirect(request, "/index.html");
         } catch (Exception e) {
             logger.error(e.getMessage());

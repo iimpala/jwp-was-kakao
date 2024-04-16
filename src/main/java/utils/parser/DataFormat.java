@@ -1,6 +1,6 @@
 package utils.parser;
 
-import webserver.ContentType;
+import webserver.http.ContentType;
 
 import java.util.Arrays;
 import java.util.Optional;

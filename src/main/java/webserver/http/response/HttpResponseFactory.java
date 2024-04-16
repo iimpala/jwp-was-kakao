@@ -1,6 +1,6 @@
-package webserver.response;
+package webserver.http.response;
 
-import webserver.request.HttpRequest;
+import webserver.http.request.HttpRequest;
 
 public class HttpResponseFactory {
 

@@ -1,8 +1,8 @@
 package webserver.controller;
 
-import webserver.request.HttpRequest;
-import webserver.response.HttpResponse;
-import webserver.response.HttpResponseFactory;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
+import webserver.http.response.HttpResponseFactory;
 
 public class AbstractController implements Controller{
 
