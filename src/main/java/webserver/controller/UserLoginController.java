@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import service.UserLoginDto;
 import service.UserService;
 import utils.parser.DataParser;
+import webserver.http.HttpCookie;
 import webserver.http.request.HttpRequest;
 import webserver.http.response.HttpResponse;
 import webserver.http.response.HttpResponseFactory;
@@ -38,7 +39,7 @@ public class UserLoginController extends AbstractController {
             UUID jSessionId = UUID.randomUUID();
 
             HttpResponse response = HttpResponseFactory.redirect(request, "/index.html");
-            response.setCookie("JSESSIONID", jSessionId.toString());
+            response.addCookie(new HttpCookie("JSESSIONID", jSessionId.toString(), "/"));
 
             return response;
         } catch (Exception e) {

@@ -2,20 +2,27 @@ package webserver.http.request;
 
 import webserver.http.HttpCookie;
 
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpRequestHeader header;
-    private final String body;
     private final Map<String, String> queryParams;
+    private final List<HttpCookie> cookie;
+    private final String body;
 
-    public HttpRequest(RequestLine requestLine, HttpRequestHeader header, String body, Map<String, String> queryParams) {
+    public HttpRequest(RequestLine requestLine,
+                       HttpRequestHeader header,
+                       Map<String, String> queryParams,
+                       List<HttpCookie> cookie,
+                       String body) {
         this.requestLine = requestLine;
         this.header = header;
-        this.body = body;
         this.queryParams = queryParams;
+        this.cookie = cookie;
+        this.body = body;
     }
 
     public boolean isGet() {
@@ -50,8 +57,8 @@ public class HttpRequest {
         return header;
     }
 
-    public HttpCookie getCookie() {
-        return header.getCookie();
+    public List<HttpCookie> getCookie() {
+        return cookie;
     }
 
     public String getBody() {

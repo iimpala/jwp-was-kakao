@@ -1,7 +1,5 @@
 package webserver.http.request;
 
-import webserver.http.HttpCookie;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,15 +10,9 @@ public class HttpRequestHeader {
     private static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
-    private final HttpCookie cookie;
-
-    public HttpRequestHeader(Map<String, String> headers, HttpCookie cookie) {
-        this.headers = headers;
-        this.cookie = cookie;
-    }
 
     public HttpRequestHeader(Map<String, String> headers) {
-        this(headers, parseCookie(headers));
+        this.headers = headers;
     }
 
     public HttpRequestHeader(List<String> headerString) {
@@ -38,12 +30,12 @@ public class HttpRequestHeader {
         return headers;
     }
 
-    private static HttpCookie parseCookie(Map<String, String> headers) {
+    public String getCookie() {
         if (headers.containsKey("Cookie")) {
-            return HttpCookie.of(headers.get("Cookie"));
+            return headers.get("Cookie");
         }
 
-        return new HttpCookie();
+        return "";
     }
 
     public String getContentType() {
@@ -64,9 +56,5 @@ public class HttpRequestHeader {
 
     public String getAccept() {
         return headers.get("Accept");
-    }
-
-    public HttpCookie getCookie() {
-        return cookie;
     }
 }
