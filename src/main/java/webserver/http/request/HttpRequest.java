@@ -1,5 +1,7 @@
 package webserver.http.request;
 
+import webserver.http.HttpCookie;
+
 import java.util.Map;
 
 public class HttpRequest {
@@ -46,6 +48,10 @@ public class HttpRequest {
 
     public HttpRequestHeader getHeader() {
         return header;
+    }
+
+    public HttpCookie getCookie() {
+        return header.getCookie();
     }
 
     public String getBody() {

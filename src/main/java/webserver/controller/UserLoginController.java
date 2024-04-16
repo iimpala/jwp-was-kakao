@@ -11,6 +11,7 @@ import webserver.http.response.HttpResponse;
 import webserver.http.response.HttpResponseFactory;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class UserLoginController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginController.class);
@@ -34,11 +35,12 @@ public class UserLoginController extends AbstractController {
 
         try {
             User user = userService.login(userLoginDto);
-            logger.info("Login Success : {}", user);
+            UUID jSessionId = UUID.randomUUID();
 
+            HttpResponse response = HttpResponseFactory.redirect(request, "/index.html");
+            response.setCookie("JSESSIONID", jSessionId.toString());
 
-
-            return HttpResponseFactory.redirect(request, "/index.html");
+            return response;
         } catch (Exception e) {
             logger.error(e.getMessage());
             return HttpResponseFactory.redirect(request, "/user/login_failed.html");
