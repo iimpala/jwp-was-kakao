@@ -31,6 +31,7 @@ public class RequestHandler implements Runnable {
             HttpRequest request = HttpRequestFactory.createRequest(reader);
 
             Controller controller = handlerMapping.getController(request.getPath());
+            System.out.println("controller = " + controller);
             HttpResponse response = controller.service(request);
 
             sendResponse(dos, response);

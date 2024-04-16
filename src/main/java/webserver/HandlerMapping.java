@@ -1,10 +1,7 @@
 package webserver;
 
 import service.UserService;
-import webserver.controller.AbstractController;
-import webserver.controller.Controller;
-import webserver.controller.ResourceController;
-import webserver.controller.UserController;
+import webserver.controller.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,17 +12,20 @@ public class HandlerMapping {
 
     public HandlerMapping() {
         Map<String, Controller> handlerMapping = new HashMap<>();
-        handlerMapping.put("/", new ResourceController());
-        handlerMapping.put("/user/create", new UserController(new UserService()));
+        UserService userService = new UserService();
+
+        handlerMapping.put("/user/create", new UserCreateController(userService));
+        handlerMapping.put("/user/login", new UserLoginController(userService));
+
         this.handlerMapping = handlerMapping;
     }
 
     public Controller getController(String path) {
         Optional<Controller> optionalController = handlerMapping.keySet().stream()
-                .filter(path::startsWith)
+                .filter(path::equals)
                 .map(handlerMapping::get)
                 .findFirst();
 
-        return optionalController.orElseGet(AbstractController::new);
+        return optionalController.orElseGet(ResourceController::new);
     }
 }

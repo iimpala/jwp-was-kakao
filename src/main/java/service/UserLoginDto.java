@@ -2,19 +2,15 @@ package service;
 
 import java.util.Arrays;
 
-public class UserDto {
+public class UserLoginDto {
 
     private final String userId;
     private final String password;
-    private final String name;
-    private final String email;
 
-    public UserDto(String userId, String password, String name, String email) {
-        validate(userId, password, name, email);
+    public UserLoginDto(String userId, String password) {
+        validate(userId, password);
         this.userId = userId;
         this.password = password;
-        this.name = name;
-        this.email = email;
     }
 
     private void validate(String... inputValues) {
@@ -34,13 +30,5 @@ public class UserDto {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
     }
 }
