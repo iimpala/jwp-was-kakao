@@ -15,8 +15,6 @@ public class ResourceController extends AbstractController {
         String path = request.getPath();
         String extension = parseExt(path);
 
-        System.out.println("path = " + path);
-
         Optional<Resource> optionalResource = Resource.ofExt(extension);
 
         if (optionalResource.isPresent()) {
