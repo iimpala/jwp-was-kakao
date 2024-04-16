@@ -7,20 +7,44 @@ import service.UserLoginDto;
 import service.UserService;
 import utils.parser.DataParser;
 import webserver.http.HttpCookie;
+import webserver.http.HttpSession;
+import webserver.http.HttpSessionManager;
 import webserver.http.request.HttpRequest;
 import webserver.http.response.HttpResponse;
 import webserver.http.response.HttpResponseFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserLoginController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginController.class);
 
+    private final HttpSessionManager sessionManager = HttpSessionManager.getInstance();
     private final UserService userService;
 
     public UserLoginController(UserService userService) {
         this.userService = userService;
+    }
+
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
+        Optional<String> jSessionId = request.getCookie().stream()
+                .filter(cookie -> "JSESSIONID".equals(cookie.getName()))
+                .map(HttpCookie::getValue)
+                .findFirst();
+
+        if (jSessionId.isEmpty()) {
+            return HttpResponseFactory.redirect(request, "/user/login.html");
+        }
+
+        Optional<HttpSession> optionalSession = sessionManager.getSession(jSessionId.get());
+
+        if (optionalSession.isEmpty()) {
+            return HttpResponseFactory.redirect(request, "/user/login.html");
+        }
+
+        return HttpResponseFactory.redirect(request, "/index.html");
     }
 
     @Override
@@ -36,10 +60,11 @@ public class UserLoginController extends AbstractController {
 
         try {
             User user = userService.login(userLoginDto);
-            UUID jSessionId = UUID.randomUUID();
+
+            HttpSession session = createUserSession(user);
 
             HttpResponse response = HttpResponseFactory.redirect(request, "/index.html");
-            response.addCookie(new HttpCookie("JSESSIONID", jSessionId.toString(), "/"));
+            response.addCookie(new HttpCookie("JSESSIONID", session.getId(), "/"));
             response.addCookie(new HttpCookie("logined", "true", "/"));
 
             return response;
@@ -47,5 +72,14 @@ public class UserLoginController extends AbstractController {
             logger.error(e.getMessage());
             return HttpResponseFactory.redirect(request, "/user/login_failed.html");
         }
+    }
+
+    private HttpSession createUserSession(User user) {
+        UUID jSessionId = UUID.randomUUID();
+        HttpSession session = new HttpSession(jSessionId.toString());
+        session.setAttribute("user", user);
+
+        sessionManager.add(session);
+        return session;
     }
 }
