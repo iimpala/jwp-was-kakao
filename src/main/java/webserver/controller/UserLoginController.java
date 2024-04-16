@@ -40,6 +40,7 @@ public class UserLoginController extends AbstractController {
 
             HttpResponse response = HttpResponseFactory.redirect(request, "/index.html");
             response.addCookie(new HttpCookie("JSESSIONID", jSessionId.toString(), "/"));
+            response.addCookie(new HttpCookie("logined", "true", "/"));
 
             return response;
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package service;
 
 import db.DataBase;
 import model.User;
+import model.Users;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ public class UserServiceTest {
         String name = "이동규";
         String email = "brainbackdoor@gmail.com";
         UserCreateDto userCreateDto = new UserCreateDto(userId, password, name, email);
-        User savedUser = service.save(userCreateDto);
+        service.save(userCreateDto);
 
         //when
         //then
@@ -60,5 +61,21 @@ public class UserServiceTest {
                 .isInstanceOf(RuntimeException.class);
         Assertions.assertThatThrownBy(() -> service.login(new UserLoginDto("wrongUserId", "pw")))
                 .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    void 전체_사용자를_조회한다() {
+        //given
+        UserService service = new UserService();
+        User user1 = service.save(new UserCreateDto("cu1", "pw", "이동규1", "cu@gmail.com"));
+        User user2 = service.save(new UserCreateDto("cu2", "pw", "이동규2", "cu@gmail.com"));
+        User user3 = service.save(new UserCreateDto("cu3", "pw", "이동규3", "cu@gmail.com"));
+
+        //when
+        Users users = service.findAll();
+
+        //then
+        Assertions.assertThat(users.getUsers().size()).isEqualTo(3);
+        Assertions.assertThat(users.getUsers()).containsExactlyInAnyOrder(user1, user2, user3);
     }
 }

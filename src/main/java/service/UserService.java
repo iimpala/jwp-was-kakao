@@ -2,6 +2,9 @@ package service;
 
 import db.DataBase;
 import model.User;
+import model.Users;
+
+import java.util.ArrayList;
 
 public class UserService {
 
@@ -22,6 +25,10 @@ public class UserService {
         }
 
         throw new IllegalArgumentException("Login Failed");
+    }
+
+    public Users findAll() {
+        return new Users(new ArrayList<>(DataBase.findAll()));
     }
 }
 

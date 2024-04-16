@@ -12,14 +12,26 @@ public class HttpCookie {
     private final String path;
 
     public HttpCookie(String name, String value, String path) {
-        this.name = name;
-        this.value = value;
-        this.path = path;
+        this.name = name.trim();
+        this.value = value.trim();
+        this.path = path.trim();
     }
 
     public static HttpCookie of(String cookiePair) {
         String[] cookieEntries = cookiePair.split(COOKIE_KEY_VALUE_DELIMITER);
         return new HttpCookie(cookieEntries[COOKIE_KEY_INDEX], cookieEntries[COOKIE_VALUE_INDEX], "");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     @Override
