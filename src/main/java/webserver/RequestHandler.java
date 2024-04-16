@@ -5,14 +5,15 @@ import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import webserver.controller.Controller;
 import webserver.request.HttpRequest;
 import webserver.request.HttpRequestFactory;
 import webserver.response.HttpResponse;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    private final HandlerMapping handlerMapping = new HandlerMapping();
     private final Socket connection;
-    private final RequestController controller = new RequestController();
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -29,7 +30,9 @@ public class RequestHandler implements Runnable {
 
             HttpRequest request = HttpRequestFactory.createRequest(reader);
 
+            Controller controller = handlerMapping.getController(request.getPath());
             HttpResponse response = controller.service(request);
+
             sendResponse(dos, response);
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -7,6 +7,9 @@ public enum Resource {
     HTML("./templates", "html"),
     JAVASCRIPT("./static", "js"),
     CSS("./static", "css"),
+    WOFF("./static", "woff"),
+    TTF("./static", "ttf"),
+    ICO("./template", "ico")
     ;
 
     private final String prefix;
