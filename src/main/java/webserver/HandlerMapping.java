@@ -8,7 +8,6 @@ import webserver.controller.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class HandlerMapping {
     private final Map<String, Controller> handlerMapping;
@@ -33,11 +32,6 @@ public class HandlerMapping {
     }
 
     public Controller getController(String path) {
-        Optional<Controller> optionalController = handlerMapping.keySet().stream()
-                .filter(path::equals)
-                .map(handlerMapping::get)
-                .findFirst();
-
-        return optionalController.orElseGet(ResourceController::new);
+        return handlerMapping.getOrDefault(path, new ResourceController());
     }
 }
