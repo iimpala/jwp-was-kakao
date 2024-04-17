@@ -18,7 +18,8 @@ public class UserCreateController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return saveUser(request, request.getQueryParams());
+        saveUser(request.getQueryParams());
+        return HttpResponseFactory.redirect(request, "/index.html");
     }
 
     @Override
@@ -27,10 +28,12 @@ public class UserCreateController extends AbstractController {
         DataParser parser = DataParser.get(contentType);
 
         String body = request.getBody();
-        return saveUser(request, parser.parse(body));
+        saveUser(parser.parse(body));
+
+        return HttpResponseFactory.redirect(request, "/index.html");
     }
 
-    private HttpResponse saveUser(HttpRequest request, Map<String, String> param) {
+    private void saveUser(Map<String, String> param) {
         UserCreateDto userCreateDto = new UserCreateDto(
                 param.getOrDefault("userId", ""),
                 param.getOrDefault("password", ""),
@@ -38,8 +41,6 @@ public class UserCreateController extends AbstractController {
                 param.getOrDefault("email", "")
         );
         userService.save(userCreateDto);
-
-        return HttpResponseFactory.redirect(request, "/index.html");
     }
 }
 
