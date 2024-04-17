@@ -7,10 +7,8 @@ import webserver.http.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class HttpRequestFactory {
@@ -24,7 +22,7 @@ public class HttpRequestFactory {
         Map<String, String> queryParams = parser.parse(queryString);
 
         HttpRequestHeader header = new HttpRequestHeader(getHeaderLines(reader));
-        List<HttpCookie> cookie = parseCookies(header.getCookie());
+        Map<String, HttpCookie> cookie = parseCookies(header.getCookie());
 
         int contentLength = header.getContentLength();
         String body = getRequestBody(reader, contentLength);
@@ -32,16 +30,19 @@ public class HttpRequestFactory {
         return new HttpRequest(requestLine, header, queryParams, cookie, body);
     }
 
-    private static List<HttpCookie> parseCookies(String cookieHeader) {
+    private static Map<String, HttpCookie> parseCookies(String cookieHeader) {
         if (cookieHeader.isEmpty() || cookieHeader.isBlank()) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
         String[] cookiePairs = cookieHeader.split(COOKIE_DELIMITER);
 
         return Arrays.stream(cookiePairs)
                 .map(HttpCookie::of)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(
+                        HttpCookie::getName,
+                        Function.identity()
+                ));
     }
 
     private static String getRequestBody(BufferedReader reader, int contentLength) throws IOException {

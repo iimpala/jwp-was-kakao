@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.UserService;
 import webserver.http.HttpCookie;
+import webserver.http.HttpSession;
+import webserver.http.HttpSessionManager;
 import webserver.http.request.HttpRequest;
 import webserver.http.response.HttpResponse;
 import webserver.http.response.HttpResponseFactory;
@@ -19,6 +21,7 @@ public class UserListController extends AbstractController {
 
     private final Handlebars handlebars;
     private final UserService userService;
+    private final HttpSessionManager sessionManager = HttpSessionManager.getInstance();
 
     public UserListController(Handlebars handlebars, UserService userService) {
         this.handlebars = handlebars;
@@ -27,12 +30,11 @@ public class UserListController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        Optional<String> logined = request.getCookie().stream()
-                .filter(cookie -> "logined".equals(cookie.getName()))
-                .map(HttpCookie::getValue)
-                .findFirst();
+        HttpCookie cookie = request.getCookie().get("JSESSIONID");
 
-        if (logined.isEmpty() || "false".equals(logined.get())) {
+        String jSessionId = cookie.getName();
+        Optional<HttpSession> session = sessionManager.getSession(jSessionId);
+        if (session.isEmpty()) {
             return HttpResponseFactory.redirect(request, "/user/login.html");
         }
 

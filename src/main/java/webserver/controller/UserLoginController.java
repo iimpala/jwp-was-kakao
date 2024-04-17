@@ -29,18 +29,11 @@ public class UserLoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        Optional<String> jSessionId = request.getCookie().stream()
-                .filter(cookie -> "JSESSIONID".equals(cookie.getName()))
-                .map(HttpCookie::getValue)
-                .findFirst();
+        HttpCookie cookie = request.getCookie().getOrDefault("JSESSIONID", new HttpCookie("JSESSIONID", "", ""));
 
-        if (jSessionId.isEmpty()) {
-            return HttpResponseFactory.redirect(request, "/user/login.html");
-        }
-
-        Optional<HttpSession> optionalSession = sessionManager.getSession(jSessionId.get());
-
-        if (optionalSession.isEmpty()) {
+        String jSessionId = cookie.getName();
+        Optional<HttpSession> session = sessionManager.getSession(jSessionId);
+        if (session.isEmpty()) {
             return HttpResponseFactory.redirect(request, "/user/login.html");
         }
 
@@ -65,7 +58,6 @@ public class UserLoginController extends AbstractController {
 
             HttpResponse response = HttpResponseFactory.redirect(request, "/index.html");
             response.addCookie(new HttpCookie("JSESSIONID", session.getId(), "/"));
-            response.addCookie(new HttpCookie("logined", "true", "/"));
 
             return response;
         } catch (Exception e) {
